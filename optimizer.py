@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-from orcr import optimize_column_rebar
+from ORCR import optimize_column_rebar
 
 class ColumnRebarOptimizer():
     def __init__(self):
@@ -57,8 +57,7 @@ class ColumnRebarOptimizer():
     
     @property
     def comparision_statistics(self):
-        if not hasattr(self,'comparision'):
-            self.compare()
+        self.compare()
         return(self.comparision.describe())
     
     def to_excel(self,filename):
