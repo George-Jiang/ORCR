@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-from ORCR import optimize_column_rebar
+from orcr import optimize_column_rebar
 
 class ColumnRebarOptimizer():
     def __init__(self):
