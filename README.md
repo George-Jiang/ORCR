@@ -36,7 +36,9 @@ s.t.
 	\end{align}
 \right.
 $$
+
 $nt$ 为net_space钢筋净间距
+
 $pt$ 为protection_thickness钢筋保护层厚度
 
 #### 使用方法
