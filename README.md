@@ -75,7 +75,6 @@ bn,bd,hn,hd,cd,pt,b_nt,h_nt = optimize_column_rebar(b,h,
 - 若为整数，则此问题为MIP问题，即混合整数线性规划，求解时间约为0.02s
 
 ### to do list
-- 增加批量处理功能
 - 增加CAD图纸生成功能
 
 
@@ -84,3 +83,4 @@ bn,bd,hn,hd,cd,pt,b_nt,h_nt = optimize_column_rebar(b,h,
 - 增加约束条件
 - 钢筋间距约束
 - 角筋配筋量约束
+- 增加批量处理功能，由ColumnRebarOptimizer类实现
