@@ -67,6 +67,15 @@ bn,bd,hn,hd,cd,pt,b_nt,h_nt = optimize_column_rebar(b,h,
     #pt,protection_thickness,钢筋保护层厚度
     #b_nt,b边钢筋净距
     #h_nt,h边钢筋净距
+
+
+###批量处理功能，由ColumnRebarOptimizer类实现
+from orcr import ColumnRebarOptimizer
+model = ColumnRebarOptimizer()
+model.generate_from_excel(excel_filename)
+model.optimize()
+model.compare()
+model.to_excel(filename)
 ```
 
 #### 备注
