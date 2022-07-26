@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 from . import optimize_column_rebar
-
+from .utils import get_col_As_section_info
 
 class ColumnRebarOptimizer():
     def __init__(self):
@@ -11,6 +11,11 @@ class ColumnRebarOptimizer():
         self.excel_filename = excel_filename
         self.column_df = pd.read_excel(excel_filename)
         self.get_columns_info(self.column_df)
+
+    def generate_from_ydb(self, dbs_path):
+        self.all_info = get_col_As_section_info(dbs_path)
+        self.columns_info = self.all_info[['b', 'h', 'b_As', 'h_As', 'c_As', 'all_As']]
+        return(self.columns_info)
 
     @classmethod
     def calc_column_As(cls, bn, bd, hn, hd, cd):
@@ -40,6 +45,11 @@ class ColumnRebarOptimizer():
             one = [row.b, row.h] + one
             result.append(one)
         self.optimized_df = pd.DataFrame(result, columns=['b', 'h', 'bn', 'bd', 'hn', 'hd', 'cd', 'pt', 'b_nt', 'h_nt'])
+
+        df = self.optimized_df
+        optimized_rebar = np.column_stack(self.calc_column_As(df.bn, df.bd, df.hn, df.hd, df.cd))
+        self.optimized_rebar = pd.DataFrame(optimized_rebar, columns=['b_As', 'h_As', 'c_As', 'all_As'])
+
         return(self.optimized_df)
 
     def compare(self):
@@ -48,10 +58,6 @@ class ColumnRebarOptimizer():
         df = self.column_df
         origial_rebar = np.column_stack(self.calc_column_As(df.bn, df.bd, df.hn, df.hd, df.cd))
         self.origial_rebar = pd.DataFrame(origial_rebar, columns=columns)
-        # optimized
-        df = self.optimized_df
-        optimized_rebar = np.column_stack(self.calc_column_As(df.bn, df.bd, df.hn, df.hd, df.cd))
-        self.optimized_rebar = pd.DataFrame(optimized_rebar, columns=columns)
         # comparison
         self.comparison = pd.DataFrame(self.optimized_rebar / self.origial_rebar, columns=columns)
         return(self.comparison)
