@@ -5,7 +5,7 @@ import numpy as np
 def optimize_column_rebar(
         b, h,
         b_As_calc, h_As_calc, c_As_calc,
-        stirrup_d=8, pt_min=20,
+        stirrup_d=8, pt_min=20, min_As_rate=None,
         bn_input=None, hn_input=None):
     # 输入
     # b_As_calc,b边配筋计算值
@@ -13,8 +13,8 @@ def optimize_column_rebar(
     model = Model()
 
     rebar_list = np.array([12, 14, 16, 18, 20, 22, 25, 28, 30, 32, 36, 40])
-    # 可选钢筋的单根面积(cm2)
-    rebar_area_list = np.pi * rebar_list ** 2 / 4 / 100
+    # 可选钢筋的单根面积(mm2)
+    rebar_area_list = np.pi * rebar_list ** 2 / 4
 
     ###添加变量
 
@@ -22,6 +22,7 @@ def optimize_column_rebar(
     bn = model.addVar('bn', vtype='I')
     hn = model.addVar('hn', vtype='I')
     all_As = model.addVar('all_As')
+    As_rate = all_As / b / h
 
     # 选筋0-1变量
     b_rebar_co = np.array([model.addVar('b_rebar_d' + str(e), vtype='B') for e in rebar_list])
@@ -76,6 +77,10 @@ def optimize_column_rebar(
     else:
         model.addCons(hn == hn_input)
 
+    #最小配筋率约束
+    if min_As_rate is not None:
+        model.addCons(As_rate >= min_As_rate)
+
     # 添加保护层厚度约束
     model.addCons(pt >= pt_min)
     model.addCons(pt_rebar >= bd)
@@ -104,7 +109,7 @@ def optimize_column_rebar(
         h_nt_result = round(
             (h - 2 * pt_result - 2 * cd_result - 2 * stirrup_d - hn_result * hd_result) / (hn_result + 1))
         # print('结果:')
-        # print('全部配筋梁(cm2):', obj)
+        # print('全部配筋梁(mm2):', obj)
         # print('b边钢筋量:', solve[b_As])
         # print('h边钢筋量:', solve[h_As])
         # print('b:', str(bn_result) + 'D' + str(bd_result))

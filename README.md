@@ -46,7 +46,7 @@ $pt$ 为protection_thickness钢筋保护层厚度
 from orcr import optimize_column_rebar
 bn,bd,hn,hd,cd,pt,b_nt,h_nt = optimize_column_rebar(b,h,
                                                     b_As_calc,h_As_calc,c_As_calc,
-                                                    stirrup_d=12,pt_min=20,
+                                                    stirrup_d=12,pt_min=20,min_As_rate=None,
                                                     bn_input=None,hn_input=None)
 #输入
     #b,b边截面尺寸
@@ -93,3 +93,6 @@ model.to_excel(filename)
 - 钢筋间距约束
 - 角筋配筋量约束
 - 增加批量处理功能，由ColumnRebarOptimizer类实现
+#### 2022-08-02
+- core.py增加最小配筋率约束
+- ColumnRebarOptimizer添加generate_from_ydb功能

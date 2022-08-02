@@ -34,7 +34,7 @@ def get_dsn(dbname):
     dsn_sql = '''
                 select
                 seg.ID as ID, seg.FLrNo as floor, dsn.AsDsnT as AsDsnT, 
-                dsn.AsDsnB as AsDsnB,joint.Coord as coord
+                dsn.AsDsnB as AsDsnB, dsn.AsRatio as AsRatio, joint.Coord as coord
                 from
                 tblColSeg as seg
                 inner join
@@ -48,12 +48,14 @@ def get_dsn(dbname):
     dsn = pd.read_sql(dsn_sql,con)
     con.close()
     for index,each in dsn.iterrows():
-        t = np.array(each.AsDsnT.split(','),dtype=float)
-        b = np.array(each.AsDsnB.split(','),dtype=float)
+        t = np.array(each.AsDsnT.split(','), dtype=float)
+        b = np.array(each.AsDsnB.split(','), dtype=float)
         As = np.maximum(t,b)
-        dsn.loc[index,['c_As','b_As','h_As','bs_As','hs_As']] = As/100
-        coord = np.array(each.coord.split(','),dtype='float')
+        dsn.loc[index,['c_As','b_As','h_As','bs_As','hs_As']] = As
+        coord = np.array(each.coord.split(','), dtype=float)
         dsn.loc[index,['X','Y','Z']] = coord
+        As_ratio = np.array(each.AsRatio.split(','), dtype=float)
+        dsn.loc[index, ['min_As_ratio', 'max_As_ratio', 'min_stirrup_Vol_As_ratio']] = As_ratio
     dsn['all_As'] = 2 * (dsn.b_As + dsn.h_As) - 4 * dsn.c_As
     return(dsn)
 
