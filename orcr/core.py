@@ -5,8 +5,9 @@ import numpy as np
 def optimize_column_rebar(
         b, h,
         b_As_calc, h_As_calc, c_As_calc,
-        stirrup_d=8, pt_min=20, min_As_rate=None,
-        bn_input=None, hn_input=None):
+        stirrup_d=8, stirrup_legs_spacing_max=None, pt_min=20, min_As_rate=None,
+        bn_input=None, hn_input=None,
+        hideOutput=True, ignore_pt_constraint=True):
     # 输入
     # b_As_calc,b边配筋计算值
     # h_As_calc,h边配筋计算值
@@ -53,6 +54,18 @@ def optimize_column_rebar(
     b_nt = (b - 2 * pt - 2 * cd - 2 * stirrup_d - bn * bd) / (bn + 1)
     h_nt = (h - 2 * pt - 2 * cd - 2 * stirrup_d - hn * hd) / (hn + 1)
 
+    # 箍筋肢距sls:stirrup_legs_spacing
+    b_sls_4_1 = b_nt + 2 * bd + stirrup_d
+    b_sls_4_2 = b_nt + cd
+    b_sls_3 = b_nt + cd + bd + stirrup_d
+    b_sls_2 = b_nt + 2 * cd + stirrup_d
+
+    h_sls_4_1 = h_nt + 2 * bd + stirrup_d
+    h_sls_4_2 = h_nt + cd
+    h_sls_3 = h_nt + cd + bd + stirrup_d
+    h_sls_2 = h_nt + 2 * cd + stirrup_d
+
+
     ###添加约束
 
     # 添加单个类型选筋0-1变量约束
@@ -82,17 +95,27 @@ def optimize_column_rebar(
         model.addCons(As_rate >= min_As_rate)
 
     # 添加保护层厚度约束
-    model.addCons(pt >= pt_min)
-    model.addCons(pt_rebar >= bd)
-    model.addCons(pt_rebar >= hd)
-    model.addCons(pt_rebar >= cd)
-    model.addCons(pt <= 50)
+    if ignore_pt_constraint == True:
+        model.addCons(pt == pt_min)
+    else:
+        model.addCons(pt >= pt_min)
+        model.addCons(pt_rebar >= bd)
+        model.addCons(pt_rebar >= hd)
+        model.addCons(pt_rebar >= cd)
+        model.addCons(pt <= 50)
+
+    # 添加箍筋肢距约束
+    # 现将所有约束条件全部加入，带与箍筋一同建模时，再修改此部分为相应箍筋肢数对应的条件
+    if stirrup_legs_spacing_max is not None:
+        for each in [b_sls_4_1, b_sls_4_2, b_sls_3, b_sls_2, h_sls_4_1, h_sls_4_2, h_sls_3, h_sls_2]:
+            model.addCons(each <= stirrup_legs_spacing_max)
 
     # 以约束方式添加目标函数，SCIP不允许目标函数为非线性，只能以约束的形式输入
     model.addCons(all_As == 4 * cA + 2 * bn * bA + 2 * hn * hA)
 
     model.setObjective(all_As)
-
+    if hideOutput == True:
+        model.hideOutput()
     model.optimize()
 
     if model.getNSols() > 0:
@@ -108,13 +131,6 @@ def optimize_column_rebar(
             (b - 2 * pt_result - 2 * cd_result - 2 * stirrup_d - bn_result * bd_result) / (bn_result + 1))
         h_nt_result = round(
             (h - 2 * pt_result - 2 * cd_result - 2 * stirrup_d - hn_result * hd_result) / (hn_result + 1))
-        # print('结果:')
-        # print('全部配筋梁(mm2):', obj)
-        # print('b边钢筋量:', solve[b_As])
-        # print('h边钢筋量:', solve[h_As])
-        # print('b:', str(bn_result) + 'D' + str(bd_result))
-        # print('h:', str(hn_result) + 'D' + str(hd_result))
-        # print('c:', '4D' + str(cd_result))
         return ([bn_result, bd_result, hn_result, hd_result, cd_result, pt_result, b_nt_result, h_nt_result])
 
     else:

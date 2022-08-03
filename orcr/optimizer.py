@@ -35,13 +35,20 @@ class ColumnRebarOptimizer():
         self.columns_info[['b', 'h']] = self.columns_info[['b', 'h']].astype(np.int64)
         return(self.columns_info)
 
-    def optimize(self, stirrup_d=8, pt_min=20, min_As_rate=None, bn_input=None, hn_input=None):
+    def optimize(self, stirrup_d=8, stirrup_legs_spacing_max=None,
+                 pt_min=20, min_As_rate=None, bn_input=None, hn_input=None, hideOutput=True, ignore_pt_constraint=True):
         result = []
         for index, row in self.columns_info.iterrows():
             b, h, b_As, h_As, c_As, all_As = row
             one = optimize_column_rebar(b, h, b_As, h_As, c_As,
-                                        stirrup_d=stirrup_d, pt_min=pt_min, min_As_rate=min_As_rate,
-                                        bn_input=bn_input, hn_input=hn_input)
+                                        stirrup_d=stirrup_d,
+                                        stirrup_legs_spacing_max=stirrup_legs_spacing_max,
+                                        pt_min=pt_min,
+                                        min_As_rate=min_As_rate,
+                                        bn_input=bn_input,
+                                        hn_input=hn_input,
+                                        hideOutput=hideOutput,
+                                        ignore_pt_constraint=ignore_pt_constraint)
             if one is None:
                 one = [None] * 8
             one = [row.b, row.h] + one
